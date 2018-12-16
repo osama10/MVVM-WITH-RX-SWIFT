@@ -1,0 +1,6 @@
+
+
+target 'MVVM with RxSwift' do
+  use_frameworks!
+	pod 'RxSwift' 
+end
