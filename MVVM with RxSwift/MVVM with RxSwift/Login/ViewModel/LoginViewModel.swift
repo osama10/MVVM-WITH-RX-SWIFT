@@ -7,48 +7,43 @@
 //
 
 import Foundation
+import RxSwift
 
 class LoginViewModel {
     
-    var userName = ""{
-        didSet{
-            self.isValid = self.validateCredentials()
-        }
-    }
-    var password = ""{
-        didSet{
-           self.isValid = self.validateCredentials()
-        }
-    }
-    
-    var isCredentialsValid : ((Bool)->Void)?
-    
-    private var isValid = false {
-        didSet{
-            self.isCredentialsValid?(self.isValid)
-        }
-    }
+    var userName = Variable<String>("")
+    var password = Variable<String>("")
+    var result = Variable<String>("")
+    var loginButtonTapped : PublishSubject<Void>
+    var isValid : Observable<Bool>
     
     private let loginService : LoginService
-    
+    private let disposeBag = DisposeBag()
     
     init(loginService : LoginService) {
         self.loginService = loginService
-    }
-    
-    func didTapOnLogin(){
-        self.attemptLogin(userName: self.userName, password: self.password)
+        
+        self.isValid = Observable<Bool>.combineLatest(self.userName.asObservable(), self.password.asObservable(), resultSelector: { (_userName, _password) -> Bool in
+            return !(_userName.isEmpty || _password.isEmpty)
+        })
+        
+        self.loginButtonTapped = PublishSubject<Void>()
+        
+        self.loginButtonTapped
+            .subscribe {  [weak self] in
+                guard let `self` = self else { return }
+                self.attemptLogin(userName: self.userName.value, password: self.password.value)
+            }
+            .disposed(by: disposeBag)
+        
     }
     
     private func attemptLogin(userName : String, password : String){
         let userCred = UserCredential(userName: userName, password: password)
-        self.loginService.login(userCred: userCred) { (isValidCred) in
-            
+        self.loginService.login(userCred: userCred) { [weak self] (isValidCred) in
+            guard let `self` = self else { return }
+            self.result.value = (isValidCred) ? "Login Successful" : "Login Failed"
         }
-    }
-    
-    private func validateCredentials()->Bool{
-        return !(self.userName.isEmpty || self.password.isEmpty)
     }
     
 }

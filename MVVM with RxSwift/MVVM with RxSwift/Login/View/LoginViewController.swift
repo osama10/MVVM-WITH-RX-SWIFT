@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import RxSwift
+import RxCocoa
 
 class LoginViewController: UIViewController {
 
@@ -14,19 +16,41 @@ class LoginViewController: UIViewController {
     @IBOutlet weak var passwordTextField : UITextField!
     @IBOutlet weak var loginButton : UIButton!
     
-    let viewModel = LoginViewModel(loginService: LoginService())
     
-    override func viewDidLoad(){
+    let viewModel = LoginViewModel(loginService: LoginService())
+    let disposeBag = DisposeBag()
+
+    override func viewDidLoad() {
         super.viewDidLoad()
-        self.initialSetting()
         self.bindUI()
     }
    
-    func bindUI(){
-        self.viewModel.isCredentialsValid = { [weak self ] (isValid)in
-            guard let `self` = self else { return }
-            self.updateLoginButton(isValid: isValid)
-        }
+    private func bindUI(){
+        self.usernameTextField.rx.text
+            .orEmpty
+            .bind(to: self.viewModel.userName)
+            .disposed(by: disposeBag)
+        
+        self.passwordTextField.rx.text
+            .orEmpty
+            .bind(to: self.viewModel.password)
+            .disposed(by: disposeBag)
+        
+        self.loginButton.rx.tap
+            .bind(to : self.viewModel.loginButtonTapped)
+            .disposed(by: disposeBag)
+        
+        self.viewModel.isValid
+            .subscribe(onNext: { [weak self] (isValid) in
+                guard let `self` = self else { return }
+                self.updateLoginButton(isValid: isValid)
+            }).disposed(by: disposeBag)
+        
+        self.viewModel.result.asObservable()
+            .subscribe (onNext : { [weak self]  (message) in
+                guard let `self` = self else { return }
+                self.showAlert(message: message)
+        }).disposed(by: disposeBag)
     }
     
     private func updateLoginButton(isValid : Bool){
@@ -34,21 +58,10 @@ class LoginViewController: UIViewController {
         self.loginButton.isEnabled = isValid
     }
     
-    private func initialSetting(){
-        self.usernameTextField.addTarget(self, action: #selector(usernameTextFieldDidChange(textField:)), for: .editingChanged)
-        self.passwordTextField.addTarget(self, action: #selector(passworldTextFieldDidChange(textField:)), for: .editingChanged)
-        
+    private func showAlert(message : String){
+        let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
+        self.present(alert, animated: true, completion: nil)
     }
-    
-    @objc func usernameTextFieldDidChange(textField: UITextField){
-        viewModel.userName = textField.text ?? ""
-    }
-    
-    @objc func passworldTextFieldDidChange(textField: UITextField){
-        viewModel.password = textField.text ?? ""
-    }
-    @IBAction func didTapOnLoginButton(_ sender: UIButton) {
-        self.viewModel.didTapOnLogin()
-    }
+
 }
 
