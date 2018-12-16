@@ -66,7 +66,6 @@
 				4A7E95DD21C6A5DF0066786F /* Assets.xcassets */,
 				4A7E95DF21C6A5DF0066786F /* LaunchScreen.storyboard */,
 				4A7E95E221C6A5DF0066786F /* Info.plist */,
-				4A7E95F021C6AD860066786F /* LoginService.swift */,
 			);
 			path = "MVVM with RxSwift";
 			sourceTree = "<group>";
@@ -74,6 +73,7 @@
 		4A7E95E821C6A5E70066786F /* Login */ = {
 			isa = PBXGroup;
 			children = (
+				4A7E95F321C6B9410066786F /* Service */,
 				4A7E95EA21C6A6030066786F /* Model */,
 				4A7E95ED21C6A77E0066786F /* ViewModel */,
 				4A7E95E921C6A5FA0066786F /* View */,
@@ -103,6 +103,14 @@
 				4A7E95EE21C6A7940066786F /* LoginViewModel.swift */,
 			);
 			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		4A7E95F321C6B9410066786F /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				4A7E95F021C6AD860066786F /* LoginService.swift */,
+			);
+			path = Service;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

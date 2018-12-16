@@ -10,10 +10,27 @@ import Foundation
 
 class LoginViewModel {
     
-    var userName = ""
-    var password = ""
+    var userName = ""{
+        didSet{
+            self.isValid = self.validateCredentials()
+        }
+    }
+    var password = ""{
+        didSet{
+           self.isValid = self.validateCredentials()
+        }
+    }
+    
+    var isCredentialsValid : ((Bool)->Void)?
+    
+    private var isValid = false {
+        didSet{
+            self.isCredentialsValid?(self.isValid)
+        }
+    }
     
     private let loginService : LoginService
+    
     
     init(loginService : LoginService) {
         self.loginService = loginService
@@ -28,6 +45,10 @@ class LoginViewModel {
         self.loginService.login(userCred: userCred) { (isValidCred) in
             
         }
+    }
+    
+    private func validateCredentials()->Bool{
+        return !(self.userName.isEmpty || self.password.isEmpty)
     }
     
 }

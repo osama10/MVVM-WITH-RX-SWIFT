@@ -19,6 +19,19 @@ class LoginViewController: UIViewController {
     override func viewDidLoad(){
         super.viewDidLoad()
         self.initialSetting()
+        self.bindUI()
+    }
+   
+    func bindUI(){
+        self.viewModel.isCredentialsValid = { [weak self ] (isValid)in
+            guard let `self` = self else { return }
+            self.updateLoginButton(isValid: isValid)
+        }
+    }
+    
+    private func updateLoginButton(isValid : Bool){
+        self.loginButton.backgroundColor =  (isValid) ? .black : .gray
+        self.loginButton.isEnabled = isValid
     }
     
     private func initialSetting(){
