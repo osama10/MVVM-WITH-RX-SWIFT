@@ -1,1 +1,1 @@
-# MVVM with Rx-SWift
+# MVVM with Rx-Swift
