@@ -14,28 +14,29 @@ class LoginViewModel {
     var userName = Variable<String>("")
     var password = Variable<String>("")
     var result = Variable<String>("")
-    var loginButtonTapped : PublishSubject<Void>
-    var isValid : Observable<Bool>
+    var loginButtonTapped = PublishSubject<Void>()
+    var isValid : Observable<Bool>{
+        return  Observable<Bool>.combineLatest(self.userName.asObservable(), self.password.asObservable(), resultSelector: { (_userName, _password) -> Bool in
+            return !(_userName.isEmpty || _password.isEmpty)
+        })
+        
+    }
     
     private let loginService : LoginService
     private let disposeBag = DisposeBag()
     
     init(loginService : LoginService) {
         self.loginService = loginService
-        
-        self.isValid = Observable<Bool>.combineLatest(self.userName.asObservable(), self.password.asObservable(), resultSelector: { (_userName, _password) -> Bool in
-            return !(_userName.isEmpty || _password.isEmpty)
-        })
-        
-        self.loginButtonTapped = PublishSubject<Void>()
-        
-        self.loginButtonTapped
-            .subscribe {  [weak self] in
-                guard let `self` = self else { return }
-                self.attemptLogin(userName: self.userName.value, password: self.password.value)
-            }
-            .disposed(by: disposeBag)
-        
+        self.makeSubscriptions()
+    }
+    
+
+    private func makeSubscriptions(){
+        self.loginButtonTapped.subscribe {  [weak self] _ in
+            guard let `self` = self else { return }
+            self.attemptLogin(userName: self.userName.value, password: self.password.value)
+            
+        }.disposed(by: disposeBag)
     }
     
     private func attemptLogin(userName : String, password : String){
