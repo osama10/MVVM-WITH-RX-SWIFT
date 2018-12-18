@@ -46,6 +46,7 @@ class LoginViewController: UIViewController {
     }
     
     private func bindStates(){
+       
         self.viewModel.isValid
             .subscribe(onNext: { [weak self] (isValid) in
                 guard let `self` = self else { return }

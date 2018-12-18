@@ -15,11 +15,11 @@ class LoginViewModel {
     var password = Variable<String>("")
     var result = Variable<String>("")
     var loginButtonTapped = PublishSubject<Void>()
+    
     var isValid : Observable<Bool>{
         return  Observable<Bool>.combineLatest(self.userName.asObservable(), self.password.asObservable(), resultSelector: { (_userName, _password) -> Bool in
             return !(_userName.isEmpty || _password.isEmpty)
         })
-        
     }
     
     private let loginService : LoginService
