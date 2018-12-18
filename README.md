@@ -11,6 +11,8 @@ The project contains three branches.
 - with-rx : Has the MVVM implementation with Rx
 - without-rx : Has the MVVM implementation without Rx
 
+You can download complete presentation from [**here**](https://drive.google.com/file/d/17Ev9ewkV_aP29CZqSkLsqH_G0LZ5c5il/view?usp=sharing)
+
 ## How to run the project
 This project is built on XCode 9.4 and Swift 4.1 . Please run pod install before running the project
 
