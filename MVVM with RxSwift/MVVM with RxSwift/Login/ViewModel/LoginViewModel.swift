@@ -8,43 +8,31 @@
 
 import Foundation
 import RxSwift
+import RxCocoa
 
 class LoginViewModel {
+    var userName = BehaviorSubject<String>(value: "")
+    var password = BehaviorSubject<String>(value: "")
+    var loginDidTap = PublishSubject<Void>()
     
-    var userName = Variable<String>("")
-    var password = Variable<String>("")
-    var result = Variable<String>("")
-    var loginButtonTapped = PublishSubject<Void>()
-    
-    var isValid : Observable<Bool>{
-        return  Observable<Bool>.combineLatest(self.userName.asObservable(), self.password.asObservable(), resultSelector: { (_userName, _password) -> Bool in
-            return !(_userName.isEmpty || _password.isEmpty)
-        })
-    }
-    
-    private let loginService : LoginService
-    private let disposeBag = DisposeBag()
+    let message: Driver<String>
+    let canLogin: Driver<Bool>
     
     init(loginService : LoginService) {
-        self.loginService = loginService
-        self.makeSubscriptions()
+        
+        let input = Observable.combineLatest(userName,password)
+        
+        let isValid = input.map({ $0.isEmpty == false && $1.isEmpty == false })
+        
+        canLogin = isValid.asDriver(onErrorJustReturn: false)
+        
+        message = loginDidTap
+            .withLatestFrom(input)
+            .map({UserCredential(userName: $0, password: $1)})
+            .flatMap { (user: UserCredential) -> Observable<String> in
+                return loginService.login(userCred: user)
+                    .andThen(.just("LogedIn Successfully"))
+                    .catchError({ return .just($0.localizedDescription) })
+            }.asDriver(onErrorJustReturn: "")
     }
-    
-
-    private func makeSubscriptions(){
-        self.loginButtonTapped.subscribe {  [weak self] _ in
-            guard let `self` = self else { return }
-            self.attemptLogin(userName: self.userName.value, password: self.password.value)
-            
-        }.disposed(by: disposeBag)
-    }
-    
-    private func attemptLogin(userName : String, password : String){
-        let userCred = UserCredential(userName: userName, password: password)
-        self.loginService.login(userCred: userCred) { [weak self] (isValidCred) in
-            guard let `self` = self else { return }
-            self.result.value = (isValidCred) ? "Login Successful" : "Login Failed"
-        }
-    }
-    
 }
