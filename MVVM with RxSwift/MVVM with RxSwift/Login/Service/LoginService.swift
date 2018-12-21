@@ -21,12 +21,6 @@ extension LoginServiceError: LocalizedError {
 }
 
 class LoginService{
-    
-    func login(userCred : UserCredential, result : @escaping (Bool)->Void){
-        let isValidCred = (userCred.userName == "osama" && userCred.password == "123")
-        result(isValidCred)
-    }
-    
     func login(userCred : UserCredential) -> Completable {
         switch true {
         case userCred.userName != "osama": return .error(LoginServiceError.invalidUserName)

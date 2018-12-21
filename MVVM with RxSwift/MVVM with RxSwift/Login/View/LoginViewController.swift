@@ -24,13 +24,15 @@ class LoginViewController: UIViewController {
     }
     
     func viewModelBinding() {
-        usernameTextField.rx.text.orEmpty.bind(to: viewModel.userName).disposed(by: disposeBag)
-        passwordTextField.rx.text.orEmpty.bind(to: viewModel.password).disposed(by: disposeBag)
-        loginButton.rx.tap.bind(to: viewModel.loginDidTap).disposed(by: disposeBag)
-        
-        viewModel.canLogin.drive(loginButton.rx.isEnabled).disposed(by: disposeBag)
-        viewModel.canLogin.map({ $0 ? 1.0 : 0.5 }).drive(loginButton.rx.alpha).disposed(by: disposeBag)
-        viewModel.message.drive(onNext: showAlert).disposed(by: disposeBag)
+        //input binding
+        [usernameTextField.rx.text.orEmpty.bind(to: viewModel.userName),
+         passwordTextField.rx.text.orEmpty.bind(to: viewModel.password),
+         loginButton.rx.tap.bind(to: viewModel.loginDidTap),
+         //output binding
+            viewModel.canLogin.drive(loginButton.rx.isEnabled),
+            viewModel.canLogin.map({ $0 ? 1.0 : 0.5 }).drive(loginButton.rx.alpha),
+            viewModel.message.drive(onNext: showAlert)]
+            .forEach({ $0.disposed(by: disposeBag)})
     }
     
     private func showAlert(message : String){
